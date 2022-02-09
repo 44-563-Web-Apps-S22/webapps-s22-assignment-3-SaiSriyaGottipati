@@ -64,47 +64,57 @@
   <h4> About code </h4>
   <p>Given a weighted, undirected graph  with  vertices and  edges. You want to find a spanning tree of this graph which connects all vertices and has the least weight (i.e. the sum of weights of edges is minimal).A spanning tree is a set of edges such that any vertex can reach any other by exactly one simple path.The spanning tree with the least weight is called a minimum spanning tree.
 In the left image you can see a weighted undirected graph, and in the right image you can see the corresponding minimum spanning tree.</p>
-<pre>int n;
-    vector<vector<int>> adj; // adjacency matrix of graph
-    const int INF = 1000000000; // weight INF means there is no edge
-    
+
+<a href =" https://cp-algorithms.com/graph/mst_prim.html" code link></a>
+
+<pre>
+    const int INF = 1000000000;
+
     struct Edge {
         int w = INF, to = -1;
+        bool operator<(Edge const& other) const {
+            return make_pair(w, to) < make_pair(other.w, other.to);
+        }
     };
+    
+    int n;
+    vector<vector<Edge>> adj;
     
     void prim() {
         int total_weight = 0;
-        vector<bool> selected(n, false);
         vector<Edge> min_e(n);
         min_e[0].w = 0;
-    
-        for (int i=0; i<n; ++i) {
-            int v = -1;
-            for (int j = 0; j < n; ++j) {
-                if (!selected[j] && (v == -1 || min_e[j].w < min_e[v].w))
-                    v = j;
-            }
-    
-            if (min_e[v].w == INF) {
+        set<Edge> q;
+        q.insert({0, 0});
+        vector<bool> selected(n, false);
+        for (int i = 0; i < n; ++i) {
+            if (q.empty()) {
                 cout << "No MST!" << endl;
                 exit(0);
             }
     
+            int v = q.begin()->to;
             selected[v] = true;
-            total_weight += min_e[v].w;
+            total_weight += q.begin()->w;
+            q.erase(q.begin());
+    
             if (min_e[v].to != -1)
                 cout << v << " " << min_e[v].to << endl;
     
-            for (int to = 0; to < n; ++to) {
-                if (adj[v][to] < min_e[to].w)
-                    min_e[to] = {adj[v][to], v};
+            for (Edge e : adj[v]) {
+                if (!selected[e.to] && e.w < min_e[e.to].w) {
+                    q.erase({min_e[e.to].w, e.to});
+                    min_e[e.to] = {e.w, v};
+                    q.insert({e.w, e.to});
+                }
             }
         }
     
         cout << total_weight << endl;
     }
-</pre>
-<a href ="https://cp-algorithms.com/graph/mst_prim.html" code link></a>
+
+    </pre>
+
  
 </body>
 </html>
